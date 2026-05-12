@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
   fruitName: Peach
   level: 7
-  radius: 0.97
-  sprite: {fileID: -5929442647473175984, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
+  radius: 1.218
+  sprite: {fileID: 0}
   fallbackColor: {r: 1, g: 0.7, b: 0.5, a: 1}
   score: 36

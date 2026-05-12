@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
   fruitName: Apple
   level: 5
-  radius: 0.65
-  sprite: {fileID: 9168099589469781376, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
+  radius: 0.868
+  sprite: {fileID: 0}
   fallbackColor: {r: 0.9, g: 0.15, b: 0.15, a: 1}
   score: 21

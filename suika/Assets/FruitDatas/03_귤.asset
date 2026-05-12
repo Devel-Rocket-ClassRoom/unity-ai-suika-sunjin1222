@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
   fruitName: Tangerine
   level: 3
-  radius: 0.40
-  sprite: {fileID: 7233863465229003947, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
+  radius: 0.616
+  sprite: {fileID: 0}
   fallbackColor: {r: 1, g: 0.6, b: 0.1, a: 1}
   score: 10

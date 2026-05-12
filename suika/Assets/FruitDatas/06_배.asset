@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
   fruitName: Pear
   level: 6
-  radius: 0.80
-  sprite: {fileID: 2740233650085885138, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
+  radius: 1.036
+  sprite: {fileID: 0}
   fallbackColor: {r: 0.8, g: 0.85, b: 0.3, a: 1}
   score: 28
