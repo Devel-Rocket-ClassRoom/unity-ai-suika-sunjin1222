@@ -15,6 +15,6 @@ MonoBehaviour:
   fruitName: Melon
   level: 9
   radius: 1.61
-  sprite: {fileID: 0}
+  sprite: {fileID: -2912204449512709405, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
   fallbackColor: {r: 0.3, g: 0.75, b: 0.3, a: 1}
   score: 55

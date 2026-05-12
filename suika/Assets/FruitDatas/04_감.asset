@@ -15,6 +15,6 @@ MonoBehaviour:
   fruitName: Persimmon
   level: 4
   radius: 0.728
-  sprite: {fileID: 0}
+  sprite: {fileID: 7233863465229003947, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
   fallbackColor: {r: 0.95, g: 0.4, b: 0.1, a: 1}
   score: 15

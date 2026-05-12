@@ -385,4 +385,60 @@ public static class SceneSetup
             Debug.LogWarning("[SuikaGame] GameManager를 씬에서 찾지 못했습니다. FruitData는 생성됐으나 연결되지 않았습니다.");
         }
     }
+
+    [MenuItem("SuikaGame/스프라이트 자동 연결")]
+    static void AssignSpritesMenu()
+    {
+        string texPath = "Assets/Sprites/Fruit.png";
+        var allAssets = AssetDatabase.LoadAllAssetsAtPath(texPath);
+
+        // Fruit_2: 포도만 잡도록 메타 수정됨 (포도 복원)
+        // Fruit_6: 3행 1열 여분 과일 → 건너뜀
+        // 레벨 0~5 → Fruit_0~5, 레벨 6~10 → Fruit_7~11
+        string[] names = { "Cherry","Strawberry","Grape","Tangerine","Persimmon",
+                            "Apple","Pear","Peach","Pineapple","Melon","Watermelon" };
+        int[] spriteIndices = { 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11 };
+
+        // 실제 파일 이름에 관계없이 접두어(00_, 01_, ...)로 FruitData 찾기
+        string[] guids = AssetDatabase.FindAssets("t:FruitData", new[] { "Assets/FruitDatas" });
+        var dataMap = new System.Collections.Generic.Dictionary<int, FruitData>();
+        foreach (var guid in guids)
+        {
+            string p = AssetDatabase.GUIDToAssetPath(guid);
+            string fname = System.IO.Path.GetFileNameWithoutExtension(p);
+            if (fname.Length >= 2 && int.TryParse(fname.Substring(0, 2), out int lvl))
+            {
+                var d = AssetDatabase.LoadAssetAtPath<FruitData>(p);
+                if (d != null) dataMap[lvl] = d;
+            }
+        }
+
+        int assigned = 0;
+        for (int level = 0; level <= 10; level++)
+        {
+            string spriteName = $"Fruit_{spriteIndices[level]}";
+            Sprite spr = null;
+            foreach (var a in allAssets)
+                if (a is Sprite s && s.name == spriteName) { spr = s; break; }
+
+            if (spr == null)
+            {
+                Debug.LogWarning($"[SuikaGame] 스프라이트 '{spriteName}' 를 찾을 수 없습니다.");
+                continue;
+            }
+
+            if (!dataMap.TryGetValue(level, out var data))
+            {
+                Debug.LogWarning($"[SuikaGame] FruitData 레벨 {level} 없음");
+                continue;
+            }
+
+            data.sprite = spr;
+            EditorUtility.SetDirty(data);
+            assigned++;
+        }
+
+        AssetDatabase.SaveAssets();
+        EditorUtility.DisplayDialog("완료", $"스프라이트 {assigned}개 연결 완료!", "확인");
+    }
 }
