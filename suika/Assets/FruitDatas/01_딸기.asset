@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
   fruitName: Strawberry
   level: 1
-  radius: 0.392
-  sprite: {fileID: 0}
+  radius: 0.22
+  sprite: {fileID: -5715569955038417951, guid: 11e0289d252ae984b91b3bbb4f7d9a7a, type: 3}
   fallbackColor: {r: 0.95, g: 0.25, b: 0.25, a: 1}
   score: 3
