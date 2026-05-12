@@ -75,6 +75,109 @@ public static class SceneSetup
         EditorUtility.DisplayDialog("완료", "UI 재구성 완료!", "확인");
     }
 
+    [MenuItem("SuikaGame/타이틀 씬 생성")]
+    static void CreateTitleSceneMenu()
+    {
+        // Save and remember current scene
+        var prevScene = EditorSceneManager.GetActiveScene();
+        if (prevScene.isDirty) EditorSceneManager.SaveScene(prevScene);
+        string prevPath = prevScene.path;
+
+        // New empty scene
+        var titleScene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        // Camera
+        var camGO = new GameObject("Main Camera") { tag = "MainCamera" };
+        var cam = camGO.AddComponent<Camera>();
+        cam.orthographic = true;
+        cam.orthographicSize = 6f;
+        cam.transform.position = new Vector3(0, 0, -10);
+        cam.backgroundColor = new Color(0.96f, 0.93f, 0.86f);
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        camGO.AddComponent<AudioListener>();
+
+        // EventSystem
+        var esGO = new GameObject("EventSystem");
+        esGO.AddComponent<EventSystem>();
+        esGO.AddComponent<InputSystemUIInputModule>();
+
+        // TitleManager
+        var tmGO = new GameObject("TitleManager");
+        var tm = tmGO.AddComponent<TitleManager>();
+
+        // Canvas
+        var roundedSpr = MakeRoundedSprite(64, 14);
+        var canvasGO = new GameObject("Canvas");
+        var canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        var scaler = canvasGO.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(1080, 1920);
+        scaler.matchWidthOrHeight = 0.5f;
+        canvasGO.AddComponent<GraphicRaycaster>();
+
+        // "SUIKA" 타이틀
+        var suikaGO = MakeText(canvasGO, "TitleSuika", "SUIKA", 130,
+            TextAlignmentOptions.Center, new Color(0.15f, 0.15f, 0.15f));
+        suikaGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        SetRect(suikaGO, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0, 220), new Vector2(900, 150));
+
+        // "GAME" 부제목
+        var gameGO = MakeText(canvasGO, "TitleGame", "GAME", 90,
+            TextAlignmentOptions.Center, new Color(0.95f, 0.38f, 0.18f));
+        gameGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        SetRect(gameGO, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0, 100), new Vector2(900, 110));
+
+        // Best Score 텍스트
+        var bestScoreGO = MakeText(canvasGO, "BestScoreText", "", 42,
+            TextAlignmentOptions.Center, new Color(0.55f, 0.55f, 0.55f));
+        SetRect(bestScoreGO, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0, -20), new Vector2(700, 56));
+
+        // START 버튼
+        var btnGO = MakeRoundedPanel(canvasGO, "StartButton", new Color(1f, 0.58f, 0.14f), roundedSpr);
+        SetRect(btnGO, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+            new Vector2(0, -180), new Vector2(400, 100));
+        var btn = btnGO.AddComponent<Button>();
+        var btnColors = ColorBlock.defaultColorBlock;
+        btnColors.highlightedColor = new Color(1f, 0.68f, 0.28f);
+        btnColors.pressedColor     = new Color(0.88f, 0.48f, 0.08f);
+        btn.colors = btnColors;
+        var btnTextGO = MakeText(btnGO, "StartText", "START", 52,
+            TextAlignmentOptions.Center, Color.white);
+        btnTextGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        StretchFill(btnTextGO);
+
+        // TitleManager 필드 연결
+        var soTM = new SerializedObject(tm);
+        soTM.FindProperty("bestScoreText").objectReferenceValue = bestScoreGO.GetComponent<TMP_Text>();
+        soTM.ApplyModifiedPropertiesWithoutUndo();
+
+        // 버튼 → TitleManager.OnStartButton
+        UnityEventTools.AddPersistentListener(btn.onClick, tm.OnStartButton);
+
+        // 저장
+        if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+            AssetDatabase.CreateFolder("Assets", "Scenes");
+        EditorSceneManager.SaveScene(titleScene, "Assets/Scenes/TitleScene.unity");
+
+        // Build Settings 에 두 씬 등록 (TitleScene=0, SampleScene=1)
+        EditorBuildSettings.scenes = new[]
+        {
+            new EditorBuildSettingsScene("Assets/Scenes/TitleScene.unity", true),
+            new EditorBuildSettingsScene("Assets/Scenes/SampleScene.unity", true),
+        };
+
+        // SampleScene 복귀
+        if (!string.IsNullOrEmpty(prevPath))
+            EditorSceneManager.OpenScene(prevPath);
+
+        EditorUtility.DisplayDialog("완료",
+            "타이틀 씬 생성 완료!\nBuild Settings: TitleScene(0), SampleScene(1)", "확인");
+    }
+
     // ─────────────── 카메라 ───────────────
     static void SetupCamera()
     {

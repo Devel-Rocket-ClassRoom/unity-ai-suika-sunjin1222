@@ -87,12 +87,14 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOver) return;
         isGameOver = true;
+        int best = PlayerPrefs.GetInt("BestScore", 0);
+        if (score > best) PlayerPrefs.SetInt("BestScore", score);
         FindFirstObjectByType<FruitSpawner>()?.SetGameOver();
         UIManager.Instance.ShowGameOver(score);
     }
 
     public void Restart()
     {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene("TitleScene");
     }
 }
