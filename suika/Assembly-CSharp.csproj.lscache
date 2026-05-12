@@ -51,11 +51,13 @@ TemporaryDependencyNodeTargetIdentifier=netstandard2.1
 
 [sourceFiles]
 Assets/Scripts/
+ Background.cs
  DangerZone.cs
  Fruit.cs
  FruitData.cs
  FruitSpawner.cs
  GameManager.cs
+ TitleManager.cs
  UIManager.cs
 Temp/obj/Assembly-CSharp/.NETStandard,Version=v2.1.AssemblyAttributes.cs
 

@@ -5,7 +5,7 @@ using UnityEngine;
 // BoxCollider2D (IsTrigger=true) 를 달고 danger line 위에 배치
 public class DangerZone : MonoBehaviour
 {
-    [SerializeField] private float gameOverDelay = 2f;
+    [SerializeField] private float gameOverDelay = 5f;
 
     private readonly Dictionary<Fruit, float> fruitsInZone = new();
 

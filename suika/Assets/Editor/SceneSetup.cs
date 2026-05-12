@@ -81,12 +81,74 @@ public static class SceneSetup
         var existing = GameObject.Find("Background");
         if (existing != null) Object.DestroyImmediate(existing);
 
-        var go = new GameObject("Background");
-        go.AddComponent<Background>();
+        Sprite dotSprite = GetOrCreateDotSprite();
+
+        var root = new GameObject("Background");
+        var rng  = new System.Random(42);
+
+        float halfW = 3.8f;
+        float minY  = -6.8f;
+        float maxY  =  5.8f;
+
+        for (int i = 0; i < 55; i++)
+        {
+            float x    = (float)(rng.NextDouble() * halfW * 2 - halfW);
+            float y    = (float)(rng.NextDouble() * (maxY - minY) + minY);
+            bool  star = rng.NextDouble() < 0.28;
+            float size = star
+                ? (float)(rng.NextDouble() * 0.10f + 0.12f)
+                : (float)(rng.NextDouble() * 0.06f + 0.03f);
+
+            var dot = new GameObject($"Dot_{i}");
+            dot.transform.SetParent(root.transform);
+            dot.transform.position   = new Vector3(x, y, 0);
+            dot.transform.localScale = Vector3.one * size;
+
+            var sr = dot.AddComponent<SpriteRenderer>();
+            sr.sprite       = dotSprite;
+            sr.sortingOrder = -5;
+            float alpha = star ? 0.30f : 0.18f;
+            sr.color = new Color(0.78f, 0.62f, 0.38f, alpha);
+        }
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
-        EditorUtility.DisplayDialog("완료", "배경 추가 완료!\nPlay 모드에서 확인하세요.", "확인");
+        EditorUtility.DisplayDialog("완료", "배경 추가 완료!", "확인");
+    }
+
+    static Sprite GetOrCreateDotSprite()
+    {
+        const string path = "Assets/Sprites/DotSprite.png";
+        var cached = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        if (cached != null) return cached;
+
+        const int s = 64;
+        var tex = new Texture2D(s, s, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        float c = s / 2f, r = c - 1f;
+        var px = new Color32[s * s];
+        for (int y = 0; y < s; y++)
+        for (int x = 0; x < s; x++)
+        {
+            float dx = x - c + 0.5f, dy = y - c + 0.5f;
+            byte  a  = (byte)(Mathf.Clamp01(r - Mathf.Sqrt(dx * dx + dy * dy) + 1f) * 255);
+            px[y * s + x] = new Color32(255, 255, 255, a);
+        }
+        tex.SetPixels32(px);
+        tex.Apply();
+
+        System.IO.File.WriteAllBytes(
+            System.IO.Path.Combine(Application.dataPath, "../", path),
+            tex.EncodeToPNG());
+        AssetDatabase.ImportAsset(path);
+
+        var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+        importer.textureType          = TextureImporterType.Sprite;
+        importer.spritePixelsPerUnit  = 64;
+        importer.alphaIsTransparency  = true;
+        importer.SaveAndReimport();
+
+        return AssetDatabase.LoadAssetAtPath<Sprite>(path);
     }
 
     [MenuItem("SuikaGame/타이틀 씬 생성")]
