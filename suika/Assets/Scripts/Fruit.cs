@@ -72,8 +72,7 @@ public class Fruit : MonoBehaviour
     {
         data = fruitData;
 
-        // 콜라이더 반지름: 스프라이트 여백 보정 (실제 과일 그래픽은 rect의 약 85%)
-        col.radius = data.radius * 0.85f;
+        col.radius = 0.5f;
         col.sharedMaterial = FruitMaterial;
 
         rb.bodyType = RigidbodyType2D.Kinematic;
@@ -109,8 +108,7 @@ public class Fruit : MonoBehaviour
         float diameter    = data.radius * 2f;
         float maxPx       = Mathf.Max(sprite.rect.width, sprite.rect.height);
         float worldDiam   = maxPx / sprite.pixelsPerUnit;
-        float extraFill   = data.sprite != null ? 1.15f : 1f; // 실제 스프라이트는 15% 확대 보정
-        visual.localScale = Vector3.one * (diameter / worldDiam) * extraFill;
+        visual.localScale = Vector3.one * (diameter / worldDiam);
     }
 
     public void SetAsPreview()
