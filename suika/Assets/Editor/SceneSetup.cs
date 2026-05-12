@@ -75,6 +75,31 @@ public static class SceneSetup
         EditorUtility.DisplayDialog("완료", "UI 재구성 완료!", "확인");
     }
 
+    [MenuItem("SuikaGame/컨테이너 내부 배경 설정")]
+    static void SetContainerInnerBg()
+    {
+        var existing = GameObject.Find("ContainerInnerBg");
+        if (existing != null) Object.DestroyImmediate(existing);
+
+        var go = new GameObject("ContainerInnerBg");
+
+        float midY   = (DANGER_Y + FLOOR_Y) / 2f;   // -1.0
+        float height = DANGER_Y - FLOOR_Y;           //  8.0
+        float width  = WALL_X * 2;                   //  6.0
+
+        go.transform.position   = new Vector3(0, midY, 0);
+        go.transform.localScale = new Vector3(width, height, 1);
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite       = MakeWhiteSprite();
+        sr.color        = new Color(1f, 0.973f, 0.933f); // #FFF8EE
+        sr.sortingOrder = -3;  // 벽(-1)보다 뒤, 점(-5)보다 앞
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("완료", "컨테이너 내부 배경색 설정 완료!\n색상: #FFF8EE", "확인");
+    }
+
     [MenuItem("SuikaGame/배경 추가")]
     static void AddBackgroundMenu()
     {
