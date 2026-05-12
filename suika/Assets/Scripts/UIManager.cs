@@ -35,7 +35,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateScore(int score)
     {
-        scoreText.text = $"Score: {score:N0}";
+        scoreText.text = $"{score:N0}";
     }
 
     public void UpdateNextFruit(FruitData data)
@@ -56,7 +56,7 @@ public class UIManager : MonoBehaviour
     {
         isGameOver = true;
         gameOverPanel.SetActive(true);
-        finalScoreText.text = $"Final Score\n{finalScore:N0}";
+        finalScoreText.text = $"{finalScore:N0}";
     }
 
     // 게임 오버 패널 버튼의 OnClick 이벤트에 연결

@@ -56,12 +56,23 @@ public static class SceneSetup
         EnsureGameManager();
         EnsureFruitSpawner();
         EnsureFruitPrefab();
-        CreateUI();
+        if (GameObject.Find("Canvas") == null) CreateUI();
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         EditorUtility.DisplayDialog("완료",
             "씬 세팅 완료!\n\n남은 작업:\n• GameManager의 Fruit Datas 배열에 FruitData 11개 연결\n• 각 FruitData에 스프라이트 할당",
             "확인");
+    }
+
+    [MenuItem("SuikaGame/UI 재구성")]
+    static void RebuildUIMenu()
+    {
+        var existing = GameObject.Find("Canvas");
+        if (existing != null) Object.DestroyImmediate(existing);
+        CreateUI();
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("완료", "UI 재구성 완료!", "확인");
     }
 
     // ─────────────── 카메라 ───────────────
@@ -185,12 +196,13 @@ public static class SceneSetup
     // ─────────────── UI ───────────────
     static void CreateUI()
     {
-        if (GameObject.Find("Canvas") != null) return;
+        var roundedSpr = MakeRoundedSprite(64, 14);
 
         // Canvas
         var canvasGO = new GameObject("Canvas");
         var canvas = canvasGO.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 10;
 
         var scaler = canvasGO.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -198,75 +210,149 @@ public static class SceneSetup
         scaler.matchWidthOrHeight = 0.5f;
         canvasGO.AddComponent<GraphicRaycaster>();
 
-        // 점수 텍스트 (좌상단)
-        var scoreGO = MakeText(canvasGO, "ScoreText", "점수: 0", 32, TextAlignmentOptions.Left);
-        AnchorCorner(scoreGO, new Vector2(0, 1), new Vector2(20, -20), new Vector2(280, 55));
+        // ── HUD 패널 (우상단, 컴팩트) ──
+        var hudPanel = MakeRoundedPanel(canvasGO, "HUDPanel", Color.white, roundedSpr);
+        // anchor top-right, pivot top-right, 160×240
+        SetRect(hudPanel, new Vector2(1, 1), new Vector2(1, 1), new Vector2(-20, -20), new Vector2(160, 240));
+        hudPanel.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.18f);
 
-        // 다음 과일 패널 (우상단)
-        var nextPanel = MakePanel(canvasGO, "NextFruitPanel", new Color(0, 0, 0, 0.35f));
-        AnchorCorner(nextPanel, new Vector2(1, 1), new Vector2(-20, -20), new Vector2(140, 175));
+        // 점수 라벨 (작게)
+        var scoreLabelGO = MakeText(hudPanel, "ScoreLabel", "SCORE", 16,
+            TextAlignmentOptions.Center, new Color(0.55f, 0.55f, 0.55f));
+        SetRect(scoreLabelGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -12), new Vector2(140, 20));
 
-        var nextLabelGO = MakeText(nextPanel, "NextLabel", "다음", 22, TextAlignmentOptions.Center);
-        AnchorCorner(nextLabelGO, new Vector2(0.5f, 1), new Vector2(0, -18), new Vector2(130, 30));
+        // 점수 숫자 (크고 굵게, scoreText)
+        var scoreTextGO = MakeText(hudPanel, "ScoreText", "0", 38,
+            TextAlignmentOptions.Center, new Color(0.15f, 0.15f, 0.15f));
+        scoreTextGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        SetRect(scoreTextGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -46), new Vector2(140, 44));
 
+        // 구분선
+        var divider = new GameObject("Divider");
+        divider.transform.SetParent(hudPanel.transform, false);
+        divider.AddComponent<Image>().color = new Color(0.88f, 0.88f, 0.88f);
+        SetRect(divider, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -98), new Vector2(130, 2));
+
+        // 다음 과일 라벨 (작게)
+        var nextLabelGO = MakeText(hudPanel, "NextLabel", "NEXT", 16,
+            TextAlignmentOptions.Center, new Color(0.55f, 0.55f, 0.55f));
+        SetRect(nextLabelGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -110), new Vector2(140, 20));
+
+        // 다음 과일 아이콘 80×80, 패널 안에 고정 (nextFruitImage)
         var nextImgGO = new GameObject("NextFruitImage");
-        nextImgGO.transform.SetParent(nextPanel.transform, false);
+        nextImgGO.transform.SetParent(hudPanel.transform, false);
         var nextImg = nextImgGO.AddComponent<Image>();
-        var ir = nextImgGO.GetComponent<RectTransform>();
-        ir.anchorMin = ir.anchorMax = new Vector2(0.5f, 1);
-        ir.pivot = new Vector2(0.5f, 1);
-        ir.anchoredPosition = new Vector2(0, -55);
-        ir.sizeDelta = new Vector2(100, 100);
+        nextImg.preserveAspect = true;
+        // pivot top-center → anchoredPosition.y=-140 → top at 140px, bottom at 220px (panel 240px)
+        SetRect(nextImgGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -140), new Vector2(80, 80));
 
-        var nextNameGO = MakeText(nextPanel, "NextFruitName", "", 20, TextAlignmentOptions.Center);
-        AnchorCorner(nextNameGO, new Vector2(0.5f, 1), new Vector2(0, -162), new Vector2(130, 30));
+        // ── 게임오버 패널 ──
+        var gameOverPanelGO = new GameObject("GameOverPanel");
+        gameOverPanelGO.transform.SetParent(canvasGO.transform, false);
+        var goOverlay = gameOverPanelGO.AddComponent<Image>();
+        goOverlay.color = new Color(0f, 0f, 0f, 0.55f);
+        var goOverlayRect = gameOverPanelGO.GetComponent<RectTransform>();
+        goOverlayRect.anchorMin = Vector2.zero;
+        goOverlayRect.anchorMax = Vector2.one;
+        goOverlayRect.offsetMin = goOverlayRect.offsetMax = Vector2.zero;
 
-        // 게임오버 패널 (전체 화면)
-        var gameOverPanel = MakePanel(canvasGO, "GameOverPanel", new Color(0, 0, 0, 0.82f));
-        var goRect = gameOverPanel.GetComponent<RectTransform>();
-        goRect.anchorMin = Vector2.zero;
-        goRect.anchorMax = Vector2.one;
-        goRect.offsetMin = goRect.offsetMax = Vector2.zero;
+        // 카드
+        var goCard = MakeRoundedPanel(gameOverPanelGO, "GameOverCard", Color.white, roundedSpr);
+        SetRect(goCard, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 0), new Vector2(540, 460));
+        goCard.AddComponent<Shadow>().effectColor = new Color(0, 0, 0, 0.25f);
 
-        var goTitle = MakeText(gameOverPanel, "GameOverTitle", "GAME OVER", 60, TextAlignmentOptions.Center);
-        AnchorCorner(goTitle, new Vector2(0.5f, 0.5f), new Vector2(0, 110), new Vector2(600, 85));
+        // 게임오버 타이틀
+        var goTitleGO = MakeText(goCard, "GameOverTitle", "GAME OVER", 68,
+            TextAlignmentOptions.Center, new Color(0.95f, 0.38f, 0.18f));
+        goTitleGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        SetRect(goTitleGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -85), new Vector2(480, 82));
 
-        var finalGO = MakeText(gameOverPanel, "FinalScoreText", "최종 점수\n0", 40, TextAlignmentOptions.Center);
-        AnchorCorner(finalGO, new Vector2(0.5f, 0.5f), new Vector2(0, 15), new Vector2(500, 130));
+        // 최종 점수 라벨
+        var finalLabelGO = MakeText(goCard, "FinalLabel", "Final Score", 30,
+            TextAlignmentOptions.Center, new Color(0.55f, 0.55f, 0.55f));
+        SetRect(finalLabelGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -185), new Vector2(420, 38));
 
-        // 재시작 버튼
-        var btnGO = MakePanel(gameOverPanel, "RestartButton", new Color(0.95f, 0.72f, 0.15f));
-        AnchorCorner(btnGO, new Vector2(0.5f, 0.5f), new Vector2(0, -90), new Vector2(260, 75));
+        // 최종 점수 숫자 (finalScoreText)
+        var finalScoreGO = MakeText(goCard, "FinalScoreText", "0", 76,
+            TextAlignmentOptions.Center, new Color(0.15f, 0.15f, 0.15f));
+        finalScoreGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        SetRect(finalScoreGO, new Vector2(0.5f, 1), new Vector2(0.5f, 1), new Vector2(0, -285), new Vector2(440, 88));
+
+        // 다시 시작 버튼
+        var btnGO = MakeRoundedPanel(goCard, "RestartButton", new Color(1f, 0.58f, 0.14f), roundedSpr);
+        SetRect(btnGO, new Vector2(0.5f, 0), new Vector2(0.5f, 0), new Vector2(0, 52), new Vector2(320, 78));
         var btn = btnGO.AddComponent<Button>();
-        var btnTxtGO = MakeText(btnGO, "BtnText", "다시 시작", 30, TextAlignmentOptions.Center);
-        StretchFill(btnTxtGO);
+        var btnColors = ColorBlock.defaultColorBlock;
+        btnColors.highlightedColor = new Color(1f, 0.68f, 0.28f);
+        btnColors.pressedColor     = new Color(0.88f, 0.48f, 0.08f);
+        btn.colors = btnColors;
+        var btnTextGO = MakeText(btnGO, "RestartText", "다시 시작", 36,
+            TextAlignmentOptions.Center, Color.white);
+        btnTextGO.GetComponent<TMP_Text>().fontStyle = FontStyles.Bold;
+        StretchFill(btnTextGO);
 
-        gameOverPanel.SetActive(false);
+        gameOverPanelGO.SetActive(false);
 
-        // UIManager 추가 & 레퍼런스 연결
+        // ── UIManager 연결 ──
         var uiManager = canvasGO.AddComponent<UIManager>();
         var so = new SerializedObject(uiManager);
-        so.FindProperty("scoreText").objectReferenceValue       = scoreGO.GetComponent<TMP_Text>();
-        so.FindProperty("nextFruitImage").objectReferenceValue  = nextImg;
-        so.FindProperty("nextFruitName").objectReferenceValue   = nextNameGO.GetComponent<TMP_Text>();
-        so.FindProperty("gameOverPanel").objectReferenceValue   = gameOverPanel;
-        so.FindProperty("finalScoreText").objectReferenceValue  = finalGO.GetComponent<TMP_Text>();
+        so.FindProperty("scoreText").objectReferenceValue      = scoreTextGO.GetComponent<TMP_Text>();
+        so.FindProperty("nextFruitImage").objectReferenceValue = nextImg;
+        so.FindProperty("nextFruitName").objectReferenceValue  = null;
+        so.FindProperty("gameOverPanel").objectReferenceValue  = gameOverPanelGO;
+        so.FindProperty("finalScoreText").objectReferenceValue = finalScoreGO.GetComponent<TMP_Text>();
         so.ApplyModifiedPropertiesWithoutUndo();
 
-        // 버튼 → UIManager.OnRestartButton 연결
         UnityEventTools.AddPersistentListener(btn.onClick, uiManager.OnRestartButton);
     }
 
     // ─────────────── UI 헬퍼 ───────────────
+    static Sprite MakeRoundedSprite(int size = 64, int cornerRadius = 14)
+    {
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        tex.filterMode = FilterMode.Bilinear;
+        var pixels = new Color32[size * size];
+        int r = cornerRadius;
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            bool inCorner = (x < r || x >= size - r) && (y < r || y >= size - r);
+            float alpha = 1f;
+            if (inCorner)
+            {
+                int cx = x < r ? r : size - r - 1;
+                int cy = y < r ? r : size - r - 1;
+                float dist = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+                alpha = Mathf.Clamp01(r - dist + 0.5f);
+            }
+            pixels[y * size + x] = new Color32(255, 255, 255, (byte)(alpha * 255));
+        }
+        tex.SetPixels32(pixels);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), Vector2.one * 0.5f,
+            100f, 0, SpriteMeshType.FullRect, new Vector4(r, r, r, r));
+    }
+
+    static GameObject MakeRoundedPanel(GameObject parent, string name, Color color, Sprite roundedSpr)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent.transform, false);
+        var img = go.AddComponent<Image>();
+        img.sprite = roundedSpr;
+        img.type   = Image.Type.Sliced;
+        img.color  = color;
+        return go;
+    }
+
     static GameObject MakeText(GameObject parent, string name, string text,
-        int fontSize, TextAlignmentOptions align)
+        int fontSize, TextAlignmentOptions align, Color color)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent.transform, false);
         var tmp = go.AddComponent<TextMeshProUGUI>();
-        tmp.text = text;
-        tmp.fontSize = fontSize;
-        tmp.color = Color.white;
+        tmp.text      = text;
+        tmp.fontSize  = fontSize;
+        tmp.color     = color;
         tmp.alignment = align;
         return go;
     }
@@ -279,7 +365,17 @@ public static class SceneSetup
         return go;
     }
 
-    // 특정 앵커 코너에 고정
+    static void SetRect(GameObject go, Vector2 anchorMin, Vector2 anchorMax, Vector2 pos, Vector2 size)
+    {
+        var r = go.GetComponent<RectTransform>();
+        r.anchorMin = anchorMin;
+        r.anchorMax = anchorMax;
+        r.pivot = (anchorMin + anchorMax) * 0.5f;
+        r.anchoredPosition = pos;
+        r.sizeDelta = size;
+    }
+
+    // 특정 앵커 코너에 고정 (하위 호환)
     static void AnchorCorner(GameObject go, Vector2 anchor, Vector2 pos, Vector2 size)
     {
         var r = go.GetComponent<RectTransform>();
@@ -289,7 +385,6 @@ public static class SceneSetup
         r.sizeDelta = size;
     }
 
-    // 부모를 꽉 채우게 stretch
     static void StretchFill(GameObject go)
     {
         var r = go.GetComponent<RectTransform>();
