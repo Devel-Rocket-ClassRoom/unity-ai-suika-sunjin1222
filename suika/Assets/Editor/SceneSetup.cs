@@ -75,6 +75,20 @@ public static class SceneSetup
         EditorUtility.DisplayDialog("완료", "UI 재구성 완료!", "확인");
     }
 
+    [MenuItem("SuikaGame/배경 추가")]
+    static void AddBackgroundMenu()
+    {
+        var existing = GameObject.Find("Background");
+        if (existing != null) Object.DestroyImmediate(existing);
+
+        var go = new GameObject("Background");
+        go.AddComponent<Background>();
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EditorSceneManager.SaveScene(EditorSceneManager.GetActiveScene());
+        EditorUtility.DisplayDialog("완료", "배경 추가 완료!\nPlay 모드에서 확인하세요.", "확인");
+    }
+
     [MenuItem("SuikaGame/타이틀 씬 생성")]
     static void CreateTitleSceneMenu()
     {
