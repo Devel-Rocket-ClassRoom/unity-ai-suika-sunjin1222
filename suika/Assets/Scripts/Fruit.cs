@@ -72,6 +72,9 @@ public class Fruit : MonoBehaviour
     {
         data = fruitData;
 
+        // transform.localScale로 물리 크기 결정 (col.radius=0.5 고정, world radius = scale*0.5 = data.radius)
+        transform.localScale = Vector3.one * data.radius * 2f;
+
         col.radius = 0.5f;
         col.sharedMaterial = FruitMaterial;
 
@@ -104,11 +107,9 @@ public class Fruit : MonoBehaviour
         sr.sprite = sprite;
         sr.color  = data.sprite != null ? Color.white : data.fallbackColor;
 
-        // 비주얼은 충돌 원(col.radius*2)보다 약간 크게 → 물리 접촉 시 과일이 시각적으로 맞닿아 보임
-        float diameter    = data.radius * 2f;
-        float maxPx       = Mathf.Max(sprite.rect.width, sprite.rect.height);
-        float worldDiam   = maxPx / sprite.pixelsPerUnit;
-        visual.localScale = Vector3.one * (diameter / worldDiam);
+        // min 기준 스케일: 짧은 변이 지름에 맞고 긴 변은 살짝 넘침 → 납작해 보이지 않음
+        float minPx = Mathf.Min(sprite.rect.width, sprite.rect.height);
+        visual.localScale = Vector3.one * (sprite.pixelsPerUnit / minPx);
     }
 
     public void SetAsPreview()
