@@ -40,7 +40,11 @@ public class UIManager : MonoBehaviour
 
     public void UpdateNextFruit(FruitData data)
     {
-        if (nextFruitName != null) nextFruitName.text = data.fruitName;
+        if (nextFruitName != null)
+        {
+            nextFruitName.text = data.fruitName;
+            nextFruitName.color = data.fallbackColor;
+        }
         if (nextFruitImage != null)
         {
             nextFruitImage.sprite = data.sprite;
