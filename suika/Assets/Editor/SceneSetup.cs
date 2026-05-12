@@ -333,17 +333,17 @@ public static class SceneSetup
 
         var table = new (string name, float radius, int score, Color color)[]
         {
-            ("체리",     0.20f,  1, new Color(0.80f, 0.10f, 0.10f)),
-            ("딸기",     0.28f,  3, new Color(0.95f, 0.25f, 0.25f)),
-            ("포도",     0.36f,  6, new Color(0.50f, 0.10f, 0.60f)),
-            ("귤",       0.44f, 10, new Color(1.00f, 0.60f, 0.10f)),
-            ("감",       0.52f, 15, new Color(0.95f, 0.40f, 0.10f)),
-            ("사과",     0.62f, 21, new Color(0.90f, 0.15f, 0.15f)),
-            ("배",       0.74f, 28, new Color(0.80f, 0.85f, 0.30f)),
-            ("복숭아",   0.87f, 36, new Color(1.00f, 0.70f, 0.50f)),
-            ("파인애플", 1.00f, 45, new Color(0.95f, 0.80f, 0.10f)),
-            ("멜론",     1.15f, 55, new Color(0.30f, 0.75f, 0.30f)),
-            ("수박",     1.30f, 66, new Color(0.10f, 0.50f, 0.10f)),
+            ("Cherry",     0.28f,  1, new Color(0.80f, 0.10f, 0.10f)),
+            ("Strawberry", 0.392f, 3, new Color(0.95f, 0.25f, 0.25f)),
+            ("Grape",      0.504f, 6, new Color(0.50f, 0.10f, 0.60f)),
+            ("Tangerine",  0.616f,10, new Color(1.00f, 0.60f, 0.10f)),
+            ("Persimmon",  0.728f,15, new Color(0.95f, 0.40f, 0.10f)),
+            ("Apple",      0.868f,21, new Color(0.90f, 0.15f, 0.15f)),
+            ("Pear",       1.036f,28, new Color(0.80f, 0.85f, 0.30f)),
+            ("Peach",      1.218f,36, new Color(1.00f, 0.70f, 0.50f)),
+            ("Pineapple",  1.40f, 45, new Color(0.95f, 0.80f, 0.10f)),
+            ("Melon",      1.61f, 55, new Color(0.30f, 0.75f, 0.30f)),
+            ("Watermelon", 1.82f, 66, new Color(0.10f, 0.50f, 0.10f)),
         };
 
         var datas = new FruitData[table.Length];

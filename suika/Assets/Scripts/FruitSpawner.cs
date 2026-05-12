@@ -4,8 +4,8 @@ using UnityEngine.InputSystem;
 public class FruitSpawner : MonoBehaviour
 {
     [Tooltip("드롭 가능한 X 범위 (컨테이너 벽 안쪽)")]
-    [SerializeField] private float minX = -2.3f;
-    [SerializeField] private float maxX = 2.3f;
+    [SerializeField] private float minX = -3f;
+    [SerializeField] private float maxX = 3f;
 
     [Tooltip("드롭 후 다음 과일 준비까지 대기 시간")]
     [SerializeField] private float dropCooldown = 0.5f;

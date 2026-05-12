@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf96f02039b56648a6bb4a5bfa707b4, type: 3}
   m_Name: "07_\uBCF5\uC22D\uC544"
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
-  fruitName: "\uBCF5\uC22D\uC544"
+  fruitName: Peach
   level: 7
-  radius: 0.87
+  radius: 1.218
   sprite: {fileID: 0}
   fallbackColor: {r: 1, g: 0.7, b: 0.5, a: 1}
   score: 36

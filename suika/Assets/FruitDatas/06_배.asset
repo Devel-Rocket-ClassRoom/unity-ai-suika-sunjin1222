@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf96f02039b56648a6bb4a5bfa707b4, type: 3}
   m_Name: "06_\uBC30"
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
-  fruitName: "\uBC30"
+  fruitName: Pear
   level: 6
-  radius: 0.74
+  radius: 1.036
   sprite: {fileID: 0}
   fallbackColor: {r: 0.8, g: 0.85, b: 0.3, a: 1}
   score: 28

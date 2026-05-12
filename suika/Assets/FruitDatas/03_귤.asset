@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caf96f02039b56648a6bb4a5bfa707b4, type: 3}
   m_Name: "03_\uADE4"
   m_EditorClassIdentifier: Assembly-CSharp::FruitData
-  fruitName: "\uADE4"
+  fruitName: Tangerine
   level: 3
-  radius: 0.44
+  radius: 0.616
   sprite: {fileID: 0}
   fallbackColor: {r: 1, g: 0.6, b: 0.1, a: 1}
   score: 10
